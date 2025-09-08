@@ -585,6 +585,12 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
         default=DefaultKeys.CHARGES.value,
     )
     parser.add_argument(
+        "--spin_per_atom",
+        help="Key of spin on atoms in training xyz",
+        type=str
+        default=DefaultKeys.SPINS.value,
+    )
+    parser.add_argument(
         "--elec_temp_key",
         help="Key of electronic temperature in training xyz",
         type=str,
@@ -1065,6 +1071,12 @@ def build_preprocess_arg_parser() -> argparse.ArgumentParser:
         help="Key of atomic charges in training xyz",
         type=str,
         default=DefaultKeys.CHARGES.value,
+    )
+    parser.add_argument(
+        "--spin_per_atom_key",
+        type=str
+        default=DefaultKeys.SPINS.value,
+        required=False,
     )
     parser.add_argument(
         "--atomic_numbers",

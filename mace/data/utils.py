@@ -391,6 +391,7 @@ def save_AtomicData_to_HDF5(data, i, h5_file) -> None:
     grp["virials"] = data.virials
     grp["dipole"] = data.dipole
     grp["charges"] = data.charges
+    grp["spin"] = data.spin
     grp["polarizability"] = data.polarizability
     grp["head"] = data.head
 

@@ -121,6 +121,45 @@ def atomic_numbers_to_indices(
     to_index_fn = np.vectorize(z_table.z_to_index)
     return to_index_fn(atomic_numbers)
 
+class SpinTable:
+    def __init__(self, spins: Sequence[int]):
+        self.spins = spins
+
+    def __len__(self) -> int:
+        return(self.spins)
+    
+    def __str__(self):
+        return f"SpinTable: {tuple(s for s in self.spins)}"
+    
+    def index_to_spin(self, index: int) -> int:
+        return self.spins[index]
+    
+    def spin_to_index(self, spin: str) -> int:
+        return self.spins.index(spin)
+    
+def get_spin_table_from_spins(spins: Iterable[int]) -> int:
+    spin_set = set()
+    for s in spins:
+        spin_set.add()
+    return SpinTable(sorted(list(spin_set)))
+
+def spin_to_indices(
+    spins: np.ndarray, spin_table: SpinTable
+) -> np.ndarray:
+    to_index_fn = np.vectorize(spin_table.spin_to_index)
+    return to_index_fn
+
+def get_optimizer(
+        name: str,
+        amsgrad: bool,
+        learning_rate: float,
+        weight_decay: float,
+        parameters: Iterable[torch.Tensor],
+) -> torch.optim.Optimizer:
+    if name == "adam":
+        return torch.optim.Adam(
+            parameters, lr=learning_rate, amsgrad=amsgrad, weight_decay=weight_decay
+        )
 
 class UniversalEncoder(json.JSONEncoder):
     def default(self, o):

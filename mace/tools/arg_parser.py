@@ -1073,7 +1073,7 @@ def build_preprocess_arg_parser() -> argparse.ArgumentParser:
         default=DefaultKeys.CHARGES.value,
     )
     parser.add_argument(
-        "--spin_per_atom_key",
+        "--spins_key",
         type=str
         default=DefaultKeys.SPINS.value,
         required=False,

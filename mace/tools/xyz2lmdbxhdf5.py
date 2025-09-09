@@ -3,6 +3,7 @@ import io
 import h5py
 from tqdm import tqdm
 from ase.db.core import connect
+import numpy as np
 
 def split_concatenated_xyz(filename):
     """
@@ -56,26 +57,43 @@ structures = split_concatenated_xyz('training_set.xyz')
 file_name = 'test'
 print(f"\nFound {len(structures)} structures")
 
+batch_size = 50
 if len(structures) > 0:
     with h5py.File(str(file_name) + '.h5', 'w') as z:
-        for i, atoms in enumerate(tqdm(structures)):
-            group_name = f"structure_{i}"
-            structure_group = z.create_group(group_name)
+        z.attrs['drop_last'] = False
 
-            structure_group.create_dataset('positions', data=atoms.positions)
-            structure_group.create_dataset('numbers', data=atoms.numbers)
-            structure_group.create_dataset('cell', data=atoms.cell.array)
-            structure_group.create_dataset('pbc', data=atoms.pbc)
+        for batch_idx in range(0, len(structures), batch_size):
+            batch_structures = structures[batch_idx:batch_idx + batch_size]
+            batch_group_name = f"config_batch_{batch_idx // batch_size}"
+            batch_group = z.create_group(batch_group_name)
 
-            for key, value in atoms.arrays.items():
-                if key not in ['positions', 'numbers']:
-                    structure_group.create_dataset(key, data=value)
+            for i, atoms in enumerate(tqdm(batch_structures)):
+                config_group_name = f"config_{i}"
+                config_group = batch_group.create_group(config_group_name)
 
-            for key, value in atoms.info.items():
-                try:
-                    structure_group.attrs[key] = value
-                except (TypeError, ValueError):
-                    structure_group.attrs[key] = str(value)
+                config_group.create_dataset('positions', data=atoms.positions)
+                config_group.create_dataset('atomic_numbers', data=atoms.numbers)
+                config_group.create_dataset('cell', data=atoms.cell.array)
+                config_group.create_dataset('pbc', data=atoms.pbc)
+
+                # add defaults for weights and types
+                config_group.create_dataset('weight', data=np.array([1.0]))
+                config_group.create_dataset('config_type', data='DFT'.encode('utf-8'))
+
+                properties_group = config_group.create_group('properties')
+                property_weights_group = config_group.create_group('property_weights')
+
+                for key, value in atoms.arrays.items():
+                    if key not in ['positions', 'numbers']:
+                        properties_group.create_dataset(key, data=value)
+
+                for key, value in atoms.info.items():
+                    if isinstance(value, (int, float, np.number)):
+                        properties_group.create_dataset(key, data=np.array([value]))
+                    # try:
+                    #     properties_group.attrs[key] = value
+                    # except (TypeError, ValueError):
+                    #     properties_group.attrs[key] = str(value)
 
     print(f"Successfully wrote {len(structures)} structures to HDF5 file")
 else:

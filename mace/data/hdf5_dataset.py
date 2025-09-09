@@ -6,12 +6,12 @@ from torch.utils.data import ConcatDataset, Dataset
 
 from mace.data.atomic_data import AtomicData
 from mace.data.utils import Configuration
-from mace.tools.utils import AtomicNumberTable
+from mace.tools import AtomicNumberTable, SpinTable
 
 
 class HDF5Dataset(Dataset):
     def __init__(
-        self, file_path, r_max, z_table, atomic_dataclass=AtomicData, **kwargs
+        self, file_path, r_max, z_table, spin_table, atomic_dataclass=AtomicData, **kwargs
     ):
         super(HDF5Dataset, self).__init__()  # pylint: disable=super-with-arguments
         self.file_path = file_path
@@ -21,6 +21,7 @@ class HDF5Dataset(Dataset):
         self.length = len(self.file.keys()) * self.batch_size
         self.r_max = r_max
         self.z_table = z_table
+        self.spin_table = spin_table
         self.atomic_dataclass = atomic_dataclass
         try:
             self.drop_last = bool(self.file.attrs["drop_last"])
@@ -74,6 +75,7 @@ class HDF5Dataset(Dataset):
         atomic_data = self.atomic_dataclass.from_config(
             config,
             z_table=self.z_table,
+            spin_table=self.spin_table,
             cutoff=self.r_max,
             heads=self.kwargs.get("heads", ["Default"]),
             **{k: v for k, v in self.kwargs.items() if k != "heads"},

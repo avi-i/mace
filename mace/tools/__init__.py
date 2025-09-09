@@ -21,6 +21,7 @@ from .train import SWAContainer, evaluate, train
 from .utils import (
     AtomicNumberTable,
     MetricsLogger,
+    SpinTable,
     atomic_numbers_to_indices,
     compute_c,
     compute_mae,
